@@ -11,16 +11,7 @@ For the platform behavior, see the main [Webhooks](/docs/reference/webhooks) and
 
 ## Transaction Webhooks
 
-Merchants can configure server-to-server callback URLs in the merchant dashboard to receive transaction and refund updates.
-
-### Supported Event Types
-
-| Event Type | Description |
-|------------|-------------|
-| `TRANSACTION_COMPLETED` | Transaction completed successfully |
-| `TRANSACTION_FAILED` | Transaction failed |
-| `REFUND_SUCCESS` | Refund completed successfully |
-| `REFUND_FAILED` | Refund failed |
+Merchants can configure server-to-server callback URLs in the merchant dashboard to receive transaction and refund updates. Supported event types and payload shapes are documented in [Webhooks](/docs/reference/webhooks).
 
 Webhook payloads are exported as TypeScript types:
 

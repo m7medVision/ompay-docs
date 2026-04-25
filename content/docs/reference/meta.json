@@ -1,8 +1,6 @@
 {
   "title": "Reference",
-  "pages": [
-    "signature-verification",
-    "webhooks",
-    "test-cards"
-  ]
+  "description": "Signatures, webhooks, and test data",
+  "icon": "Wrench",
+  "pages": ["signature-verification", "webhooks", "test-cards"]
 }

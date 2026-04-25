@@ -1,6 +1,6 @@
 {
   "title": "Getting Started",
-  "pages": [
-    "authentication"
-  ]
+  "description": "Quickstart guides, authentication, and integration flows",
+  "icon": "Rocket",
+  "pages": ["authentication", "bank-hosted", "merchant-hosted"]
 }

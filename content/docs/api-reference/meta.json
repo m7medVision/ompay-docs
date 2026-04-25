@@ -1,7 +1,6 @@
 {
   "title": "API Reference",
-  "pages": [
-    "index",
-    "endpoints"
-  ]
+  "description": "REST API endpoints and schemas",
+  "icon": "Code",
+  "pages": ["index", "endpoints"]
 }

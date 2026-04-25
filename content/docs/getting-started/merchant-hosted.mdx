@@ -1,0 +1,165 @@
+---
+title: Merchant Hosted Integration
+description: Quickstart for server-to-server checkout with card encryption and tokenization
+---
+
+# Merchant Hosted Integration
+
+The Merchant Hosted Payment Gateway enables merchants to securely manage the payment lifecycle, including order creation, card tokenization, transaction execution, refunds, and real-time webhook notifications.
+
+## Overview
+
+This integration requires:
+
+1. Creating an order with customer details
+2. Encrypting card data using AES-256-CBC
+3. Initiating the transaction
+4. Handling 3DS verification
+5. Checking payment status
+
+## Prerequisites
+
+- Client ID, client secret, and card encryption key from the OMPAY merchant dashboard
+- Ability to implement AES-256-CBC encryption
+- Server capable of making HTTP requests with required headers
+
+## Authentication
+
+All merchant-hosted requests require:
+
+- **Basic Auth**: `Authorization: Basic <base64(clientId:clientSecret)>`
+- **X-Signature**: HMAC SHA256 of `apiPath + payload`
+- **Merchant Headers**: Browser fingerprint, user agent, domain
+
+See [Authentication](/docs/getting-started/authentication) for details.
+
+## 1. Create Order
+
+```
+POST {{baseUrl}}/order
+```
+
+See the [API Reference](/docs/api-reference/endpoints/merchant-hosted/order/post) for the full request parameters and response schema.
+
+## 2. Encrypt Card Data
+
+Card details must be encrypted using AES-256-CBC with the card encryption key from your merchant dashboard.
+
+### Encryption Function (Node.js)
+
+```javascript
+const crypto = require('crypto');
+
+function encryptData(data, aesKey) {
+  const iv = crypto.randomBytes(16).toString('hex');
+  const cipher = crypto.createCipheriv(
+    'aes-256-cbc',
+    Buffer.from(aesKey, 'hex'),
+    Buffer.from(iv, 'hex'),
+  );
+  cipher.setAutoPadding(true);
+  const encryptedData = Buffer.concat([
+    cipher.update(JSON.stringify(data), 'utf8'),
+    cipher.final(),
+  ]).toString('hex');
+  return iv + '.' + encryptedData;
+}
+```
+
+### Card Data Format
+
+```javascript
+const data = {
+  cardNumber: '4111111111111111',
+  cardExpMonth: '02',
+  cardExpYear: '27',
+  cardCVV: '123',
+};
+const encryptedCardDetails = encryptData(data, aesKey);
+```
+
+### Tokenized Card Format
+
+```javascript
+const data = {
+  cardCVV: '123',
+  digitalCardId: '685b168ebf56f28d31f64428',
+};
+const encryptedCardDetails = encryptData(data, aesKey);
+```
+
+## 3. Initiate Transaction
+
+```
+POST {{baseUrl}}/transaction/initiate
+```
+
+### Transaction Modes
+
+| paymentMethod | apiType | paymentMode | secureCard | skipCVVandOTP | skipCVVOnlyFlag | Behavior |
+|---------------|---------|-------------|------------|---------------|-----------------|----------|
+| card | hosted | card | true | false | false | Enter card + CVV + OTP |
+| card | hosted | card | true | true | false | Use saved card, no auth |
+| card | hosted | card | true | false | true | Enter card + OTP only |
+| card | hosted | card | true | true | true | **Error** |
+| card | hosted | token | false | false | false | Use token + CVV + OTP |
+| card | hosted | token | false | true | false | Use token, no auth |
+| card | hosted | token | false | false | true | Use token + OTP only |
+| card | hosted | token | false | true | true | **Error** |
+
+See the [API Reference](/docs/api-reference/endpoints/merchant-hosted/transaction/initiate/post) for the full request parameters and response schema.
+
+## 4. 3DS Verification
+
+After initiating the transaction, handle the `redirectionData` in the response:
+
+- **`method`**: Either `POST` or `GET`
+- **`formData`**: HTML form for POST method that should auto-submit
+
+### POST Method
+
+The form will auto-submit to the 3DS page:
+
+```html
+<form action="https://certpayments.oabipay.com/trxns/VPAS.htm?..." method="POST" id="omannet_re_direct">
+</form>
+<script type="text/javascript">
+  document.getElementById('omannet_re_direct').submit();
+</script>
+```
+
+After 3DS completion, the customer is redirected to your `redirectionUrl`. Call the payment status API to get the final status.
+
+## 5. Check Payment Status
+
+```
+GET {{baseUrl}}/transaction/status/{paymentId}
+```
+
+See the [API Reference](/docs/api-reference/endpoints/merchant-hosted/transaction/status/paymentid/get) for the response schema.
+
+## 6. Initiate Refund
+
+```
+POST {{baseUrl}}/transaction/refund
+```
+
+See the [API Reference](/docs/api-reference/endpoints/merchant-hosted/transaction/refund/post) for the request parameters and response schema.
+
+## 7. Card Tokenization
+
+```
+GET    {{baseUrl}}/customer/{customerId}/digitalCards
+GET    {{baseUrl}}/customer/{customerId}/digitalCards/{digitalCardId}
+DELETE {{baseUrl}}/customer/{customerId}/digitalCards/{digitalCardId}
+```
+
+See the [API Reference](/docs/api-reference/endpoints/merchant-hosted) for endpoint details.
+
+## Next Steps
+
+- [Authentication](/docs/getting-started/authentication)
+- [Signature Verification](/docs/reference/signature-verification)
+- [Webhooks](/docs/reference/webhooks)
+- [Test Cards](/docs/reference/test-cards)
+- [API Reference](/docs/api-reference)

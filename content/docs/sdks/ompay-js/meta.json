@@ -1,5 +1,7 @@
 {
   "title": "ompay.js",
+  "description": "Node.js SDK for OMPAY",
+  "icon": "Package",
   "pages": [
     "index",
     "configuration",

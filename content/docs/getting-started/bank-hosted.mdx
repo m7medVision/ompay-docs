@@ -1,0 +1,90 @@
+---
+title: Bank Hosted Integration
+description: Quickstart for redirect-based checkout with OMPAY
+---
+
+# Bank Hosted Integration
+
+The bank-hosted integration redirects customers to OMPAY's secure checkout page. This approach offloads PCI compliance to OMPAY and requires minimal development effort.
+
+## Overview
+
+The flow involves:
+
+1. Creating an order on your server
+2. Redirecting the customer to OMPAY's checkout page
+3. Customer completes payment on OMPAY's secure page
+4. Customer is redirected back to your site
+5. Verifying payment status via API
+
+## Prerequisites
+
+- Client ID and secret key from the OMPAY merchant portal
+- Server capable of making HTTP requests
+- Webhook URL for payment notifications
+
+## 1. Create an Order
+
+An order must be created for every payment. The `orderId` received in the response should be passed to the checkout to ensure request security against tampering.
+
+```
+POST {{domain}}/nac/api/v1/pg/orders/create-checkout
+```
+
+See the [API Reference](/docs/api-reference/endpoints/bank-hosted/nac/api/v1/pg/orders/create-checkout/post) for the full request parameters and response schema.
+
+## 2. Integrate Checkout
+
+After creating the order, redirect the customer to the checkout URL:
+
+### UAT Environment
+
+```
+https://merchant.uat.gateway.ompay.com/cpbs/pg?actionType=checkout&orderId={ORDER_ID}&redirectUrl={REDIRECT_URL}&clientId={CLIENT_ID}
+```
+
+### Production Environment
+
+```
+https://merchant.gateway.ompay.com/cpbs/pg?actionType=checkout&orderId={ORDER_ID}&redirectUrl={REDIRECT_URL}&clientId={CLIENT_ID}
+```
+
+### URL Parameters
+
+| Parameter | Mandatory | Description |
+|-----------|-----------|-------------|
+| `orderId` | Yes | Order ID from create order response |
+| `redirectUrl` | Yes | URL to redirect after payment completion |
+| `clientId` | Yes | Your client ID |
+
+### Payment Flow
+
+1. Create an order on your server
+2. Redirect customer to the checkout URL
+3. Customer completes payment on OMPAY's secure page
+4. Customer is redirected back to your `redirectUrl`
+5. Call the status check API to retrieve the final status
+
+## 3. Handle Payment Response
+
+Upon payment completion, OMPAY will send a webhook payload to your configured webhook URL and redirect the customer back to your `redirectUrl`.
+
+See [Webhooks](/docs/reference/webhooks) for payload shapes and verification.
+
+## 4. Verify Payment Status
+
+```
+GET {{domain}}/nac/api/v1/pg/orders/check-status?orderId={orderId}
+```
+
+See the [API Reference](/docs/api-reference/endpoints/bank-hosted/nac/api/v1/pg/orders/check-status/get) for the response schema.
+
+## 5. Signature Verification
+
+Always verify the payment signature to ensure the response is authentic. See [Signature Verification](/docs/reference/signature-verification) for code examples in JavaScript and Java.
+
+## Next Steps
+
+- [Authentication](/docs/getting-started/authentication)
+- [Test Cards](/docs/reference/test-cards)
+- [API Reference](/docs/api-reference)

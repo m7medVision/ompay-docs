@@ -1,17 +1,55 @@
-import { RootProvider } from 'fumadocs-ui/provider/next';
 import './global.css';
-import { Inter } from 'next/font/google';
+import type { Viewport } from 'next';
+import { baseUrl, createMetadata } from '@/lib/metadata';
+import { appName } from '@/lib/shared';
+import { Body } from '@/app/layout.client';
+import { Provider } from '@/app/provider';
+import type { ReactNode } from 'react';
+import { Geist, Geist_Mono } from 'next/font/google';
+import { TreeContextProvider } from 'fumadocs-ui/contexts/tree';
+import { source } from '@/lib/source';
+import { NextProvider } from 'fumadocs-core/framework/next';
 
-const inter = Inter({
+export const metadata = createMetadata({
+  title: {
+    template: `%s | ${appName}`,
+    default: appName,
+  },
+  description: `${appName} Developer Documentation — integrate payment gateway, explore API references and SDKs.`,
+  metadataBase: baseUrl,
+});
+
+const geistSans = Geist({
+  variable: '--font-geist-sans',
   subsets: ['latin'],
 });
 
-export default function Layout({ children }: LayoutProps<'/'>) {
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+});
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#0A0A0A' },
+    { media: '(prefers-color-scheme: light)', color: '#fff' },
+  ],
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body className="flex flex-col min-h-screen">
-        <RootProvider>{children}</RootProvider>
-      </body>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <Body>
+        <NextProvider>
+          <TreeContextProvider tree={source.getPageTree()}>
+            <Provider>{children}</Provider>
+          </TreeContextProvider>
+        </NextProvider>
+      </Body>
     </html>
   );
 }
