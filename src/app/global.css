@@ -1,17 +1,6 @@
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
-@import 'fumadocs-openapi/css/preset.css';
-
-@theme {
-  --color-fd-primary: hsl(249, 89%, 47%);
-  --color-fd-primary-foreground: hsl(0, 0%, 98%);
-}
-
-.dark {
-  --color-fd-primary: hsl(249, 89%, 57%);
-  --color-fd-primary-foreground: hsl(0, 0%, 98%);
-}
 
 html {
   scrollbar-gutter: stable;
