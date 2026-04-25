@@ -1,5 +1,4 @@
-import { getPageImage, getPageMarkdownUrl, isOpenAPIPage, source } from '@/lib/source';
-import { APIPage } from '@/components/api-page';
+import { getPageImage, getPageMarkdownUrl, source } from '@/lib/source';
 import {
   DocsBody,
   DocsDescription,
@@ -19,25 +18,8 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  if (isOpenAPIPage(page)) {
-    return (
-      <DocsPage full>
-        <DocsTitle>{page.data.title}</DocsTitle>
-        {page.data.description ? (
-          <DocsDescription>{page.data.description}</DocsDescription>
-        ) : null}
-        <DocsBody>
-          <APIPage {...page.data.getAPIPageProps()} />
-        </DocsBody>
-      </DocsPage>
-    );
-  }
-
   const MDX = page.data.body;
   const markdownUrl = getPageMarkdownUrl(page).url;
-  const githubUrl = gitConfig.user && gitConfig.repo
-    ? `https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${page.path}`
-    : undefined;
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
@@ -47,7 +29,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover
           markdownUrl={markdownUrl}
-          githubUrl={githubUrl}
+          githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${page.path}`}
         />
       </div>
       <DocsBody>
