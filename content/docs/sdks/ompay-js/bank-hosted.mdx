@@ -1,0 +1,68 @@
+---
+title: Bank Hosted
+description: Use ompay.js for create-checkout, status checks, and hosted checkout URLs.
+---
+
+# Bank Hosted
+
+Use these methods when you want OMPAY to host the checkout page and redirect the customer back to your application after payment.
+
+For the gateway flow itself, see the main [Bank Hosted Integration](/docs/integrations/bank-hosted) guide.
+
+## Create Checkout
+
+Use either `customer` or `customerFields`. Both map to the gateway `customerFields` payload.
+
+```typescript
+const order = await client.createCheckout({
+  amount: 100.0,
+  currency: 'OMR',
+  customerFields: {
+    name: 'Omar Al-Busaidi',
+    email: 'omar@example.com',
+    phone: '+96891234567',
+  },
+  uiMode: 'checkout',
+  redirectType: 'redirect',
+  receiptId: 'ORDER-123',
+  description: 'Order description',
+  curn: 'CURN-123',
+  metadata: { customField: 'value' },
+});
+```
+
+## Check Payment Status
+
+```typescript
+const status = await client.checkStatus('order-id');
+
+console.log('Status:', status.status);
+console.log('Payment ID:', status.paymentId);
+```
+
+## Build Hosted Checkout URL
+
+Pass the order ID and redirect URL directly:
+
+```typescript
+const checkoutUrl = client.buildCheckoutUrl(
+  'order-id',
+  'https://merchant.example.com/return',
+);
+```
+
+You can also pass an object form:
+
+```typescript
+const checkoutUrl = client.buildCheckoutUrl({
+  orderId: 'order-id',
+  redirectUrl: 'https://merchant.example.com/return',
+  clientId: 'optional-client-id-override',
+});
+```
+
+## Next Steps
+
+- [Merchant Hosted](/docs/sdks/ompay-js/merchant-hosted)
+- [Errors and Testing](/docs/sdks/ompay-js/errors-and-testing)
+- [API Reference](/docs/api-reference)

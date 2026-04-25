@@ -1,0 +1,66 @@
+---
+title: ompay.js
+description: Unofficial TypeScript and Node.js SDK for OMPAY Payment Gateway integration.
+---
+
+# ompay.js
+
+Unofficial TypeScript and Node.js SDK for OMPAY Payment Gateway integration.
+
+## Installation
+
+### pnpm
+
+```bash
+pnpm add ompay.js
+```
+
+### npm
+
+```bash
+npm install ompay.js
+```
+
+### yarn
+
+```bash
+yarn add ompay.js
+```
+
+### bun
+
+```bash
+bun add ompay.js
+```
+
+## Quick Start
+
+```typescript
+import { OMPayClient } from 'ompay.js';
+
+const client = new OMPayClient({
+  clientId: 'your-client-id',
+  clientSecret: 'your-client-secret',
+  environment: 'sandbox',
+});
+
+const order = await client.createCheckout({
+  amount: 100.0,
+  currency: 'OMR',
+  customer: {
+    name: 'Omar Al-Busaidi',
+    email: 'omar@example.com',
+    phone: '+96891234567',
+  },
+});
+
+console.log('Order ID:', order.orderId);
+```
+
+## SDK Pages
+
+- [Configuration](/docs/sdks/ompay-js/configuration)
+- [Bank Hosted](/docs/sdks/ompay-js/bank-hosted)
+- [Merchant Hosted](/docs/sdks/ompay-js/merchant-hosted)
+- [Webhooks and Signatures](/docs/sdks/ompay-js/webhooks-and-signatures)
+- [Errors and Testing](/docs/sdks/ompay-js/errors-and-testing)

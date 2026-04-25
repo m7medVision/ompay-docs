@@ -1,0 +1,153 @@
+---
+title: Signature Verification
+description: How to generate and verify HMAC signatures for OMPAY API requests and responses
+---
+
+# Signature Verification
+
+OMPAY uses HMAC SHA256 signatures to ensure the integrity and authenticity of API requests and responses.
+
+## Request Signature (Merchant Hosted)
+
+For merchant-hosted APIs, each request must include an `X-Signature` header.
+
+### Signature Generation
+
+The signature is an HMAC SHA256 hash of `apiPath + payload`, using your `clientSecret` as the key.
+
+### Node.js Example
+
+```javascript
+const crypto = require('crypto');
+
+function generateHMAC(clientSecret, apiPath, payload = '') {
+  const dataToSign = apiPath + payload;
+  const signature = crypto
+    .createHmac('sha256', clientSecret)
+    .update(dataToSign)
+    .digest('hex');
+  return signature;
+}
+```
+
+### Parameters
+
+| Parameter | Mandatory | Description | Example |
+|-----------|-----------|-------------|---------|
+| `clientSecret` | Yes | Your client secret | `<your-client-secret>` |
+| `apiPath` | Yes | API endpoint path | `/order` |
+| `payload` | No (GET) / Yes (POST) | Request body as JSON string | `{"amount":100,"currency":"OMR"}` |
+
+### POST Request Example
+
+```javascript
+const apiPath = '/order';
+const payload = {
+  amount: 100,
+  currency: 'OMR',
+  description: 'Test Purchase',
+  customerFields: {
+    name: 'John Doe',
+    email: 'johndoe@example.com',
+    phone: '1234567890',
+  },
+  uiMode: 'checkout',
+};
+
+const signature = generateHMAC(clientSecret, apiPath, JSON.stringify(payload));
+```
+
+### GET Request Example
+
+```javascript
+const apiPath = '/transaction/status/paycbaff3b9dc5443f0ba0997970ebeddfa';
+const signature = generateHMAC(clientSecret, apiPath);
+```
+
+## Response Signature Verification
+
+For both bank-hosted and merchant-hosted flows, verify payment responses using HMAC SHA256 over `orderId|paymentId`.
+
+### Verification Process
+
+1. Gather inputs: `orderId`, `paymentId`, `clientSecret`
+2. Generate HMAC: `SHA256(orderId + "|" + paymentId)`
+3. Compare with response signature
+
+### JavaScript Verification
+
+```javascript
+const crypto = require('crypto');
+
+function generateHMAC(key, data) {
+  const hmac = crypto.createHmac('sha256', key);
+  hmac.update(data);
+  return hmac.digest('hex');
+}
+
+const secretKey = '<clientSecret>';
+const message = `${orderId}|${paymentId}`;
+const generatedSignature = generateHMAC(secretKey, message);
+
+if (generatedSignature === responseSignature) {
+  // Payment signature is validated
+  // Proceed with updating transaction status
+}
+```
+
+### Java Verification
+
+```java
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+public class HMACGenerator {
+  public static String generateHMAC(String key, String data) {
+    try {
+      Mac hmac = Mac.getInstance("HmacSHA256");
+      SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), "HmacSHA256");
+      hmac.init(secretKeySpec);
+      byte[] hmacBytes = hmac.doFinal(data.getBytes());
+      return bytesToHex(hmacBytes);
+    } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  public static String bytesToHex(byte[] bytes) {
+    StringBuilder hexString = new StringBuilder();
+    for (byte b : bytes) {
+      String hex = Integer.toHexString(0xff & b);
+      if (hex.length() == 1) hexString.append('0');
+      hexString.append(hex);
+    }
+    return hexString.toString();
+  }
+
+  public static void main(String[] args) {
+    String secretKey = "<clientSecret>";
+    String message = orderId + "|" + paymentId;
+    String generatedSignature = generateHMAC(secretKey, message);
+
+    if (generatedSignature.equals(signature)) {
+      // Payment signature is validated
+    }
+  }
+}
+```
+
+## Failure Responses
+
+| ResCode | Status | Description |
+|---------|--------|-------------|
+| `401` | failure | Signature missing in request header |
+| `401` | failure | Invalid signature |
+
+## Next Steps
+
+- [Authentication](/docs/getting-started/authentication)
+- [Bank Hosted Integration](/docs/integrations/bank-hosted)
+- [Merchant Hosted Integration](/docs/integrations/merchant-hosted)

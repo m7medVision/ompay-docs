@@ -1,0 +1,1380 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OMPAY Payment Gateway API",
+    "version": "1.0.0",
+    "description": "OpenAPI spec generated from the OMPAY docs in docs/. It covers bank-hosted and merchant-hosted payment flows plus card tokenization endpoints."
+  },
+  "servers": [
+    {
+      "url": "https://api.uat.gateway.ompay.com",
+      "description": "Bank-hosted UAT"
+    },
+    {
+      "url": "https://api.gateway.ompay.com",
+      "description": "Bank-hosted production"
+    }
+  ],
+  "tags": [
+    {
+      "name": "bank-hosted",
+      "description": "Checkout flow that uses the bank-hosted gateway endpoints."
+    },
+    {
+      "name": "merchant-hosted",
+      "description": "Merchant-hosted API flow for order creation, payment initiation, refunds, status checks, and token management."
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "paths": {
+    "/nac/api/v1/pg/orders/create-checkout": {
+      "post": {
+        "tags": ["bank-hosted"],
+        "summary": "Create an order for checkout",
+        "description": "Creates a bank-hosted checkout order and returns an `orderId` that must be used in the checkout redirect flow.",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankHostedOrderCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Order creation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nac/api/v1/pg/orders/check-status": {
+      "get": {
+        "tags": ["bank-hosted"],
+        "summary": "Verify order payment status",
+        "description": "Checks the current payment status for a bank-hosted order using the `orderId` query parameter.",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique order identifier returned when the order was created."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankHostedPaymentStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order": {
+      "servers": [
+        {
+          "url": "https://api.uat.gateway.ompay.com/nac/api/v1/merchant-host",
+          "description": "Merchant-hosted sandbox"
+        }
+      ],
+      "post": {
+        "tags": ["merchant-hosted"],
+        "summary": "Create a merchant-hosted order",
+        "description": "Creates an order for the merchant-hosted flow. The docs show the order payload returned as `orderId`, `receiptId`, `amount`, and `currency`.",
+        "security": [
+          {
+            "basicAuth": [],
+            "signatureAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MerchantBrowserFingerprint"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantUserAgent"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantDomain"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantIP"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MerchantOrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transaction/initiate": {
+      "servers": [
+        {
+          "url": "https://api.uat.gateway.ompay.com/nac/api/v1/merchant-host",
+          "description": "Merchant-hosted sandbox"
+        }
+      ],
+      "post": {
+        "tags": ["merchant-hosted"],
+        "summary": "Initiate a hosted card transaction",
+        "description": "Encrypts card data and initiates the hosted card transaction. The response includes redirection data for 3DS verification and may include secured card details when tokenization is enabled.",
+        "security": [
+          {
+            "basicAuth": [],
+            "signatureAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MerchantBrowserFingerprint"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantUserAgent"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantDomain"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantIP"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionInitiateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transaction initiated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitiateTransactionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route or merchant not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Transaction conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transaction/refund": {
+      "servers": [
+        {
+          "url": "https://api.uat.gateway.ompay.com/nac/api/v1/merchant-host",
+          "description": "Merchant-hosted sandbox"
+        }
+      ],
+      "post": {
+        "tags": ["merchant-hosted"],
+        "summary": "Initiate a refund",
+        "description": "Requests a refund for a completed transaction using `paymentId` and `amount`.",
+        "security": [
+          {
+            "basicAuth": [],
+            "signatureAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MerchantBrowserFingerprint"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantUserAgent"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantDomain"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantIP"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Refund initiated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Refunds are not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transaction not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Refund already initiated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid payment state or paymentId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transaction/status/{paymentId}": {
+      "servers": [
+        {
+          "url": "https://api.uat.gateway.ompay.com/nac/api/v1/merchant-host",
+          "description": "Merchant-hosted sandbox"
+        }
+      ],
+      "get": {
+        "tags": ["merchant-hosted"],
+        "summary": "Verify transaction status",
+        "description": "Retrieves the status for a sales or refund transaction using `paymentId`.",
+        "security": [
+          {
+            "basicAuth": [],
+            "signatureAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MerchantBrowserFingerprint"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantUserAgent"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantDomain"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantIP"
+          },
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique identifier for the transaction or refund."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction status returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transaction not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer/{customerId}/digitalCards": {
+      "servers": [
+        {
+          "url": "https://api.uat.gateway.ompay.com/nac/api/v1/merchant-host",
+          "description": "Merchant-hosted sandbox"
+        }
+      ],
+      "get": {
+        "tags": ["merchant-hosted"],
+        "summary": "List digital cards for a customer",
+        "description": "Returns all tokenized cards associated with a customer identifier.",
+        "security": [
+          {
+            "basicAuth": [],
+            "signatureAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MerchantBrowserFingerprint"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantUserAgent"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantDomain"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantIP"
+          },
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique identifier for the customer."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Digital cards returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DigitalCardListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer/{customerId}/digitalCards/{digitalCardId}": {
+      "servers": [
+        {
+          "url": "https://api.uat.gateway.ompay.com/nac/api/v1/merchant-host",
+          "description": "Merchant-hosted sandbox"
+        }
+      ],
+      "get": {
+        "tags": ["merchant-hosted"],
+        "summary": "Fetch a digital card by id",
+        "description": "Returns one tokenized card for the given `customerId` and `digitalCardId`.",
+        "security": [
+          {
+            "basicAuth": [],
+            "signatureAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MerchantBrowserFingerprint"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantUserAgent"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantDomain"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantIP"
+          },
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique identifier for the customer."
+          },
+          {
+            "name": "digitalCardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique identifier for the digital card."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Digital card returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DigitalCardDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["merchant-hosted"],
+        "summary": "Delete a digital card",
+        "description": "Deletes a tokenized card from the customer record.",
+        "security": [
+          {
+            "basicAuth": [],
+            "signatureAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MerchantBrowserFingerprint"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantUserAgent"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantDomain"
+          },
+          {
+            "$ref": "#/components/parameters/MerchantIP"
+          },
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique identifier for the customer."
+          },
+          {
+            "name": "digitalCardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique identifier for the digital card."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Digital card deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteDigitalCardResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Card not found or already deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "signatureAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Signature"
+      }
+    },
+    "parameters": {
+      "MerchantBrowserFingerprint": {
+        "name": "X-MERCHANT-BROWSER-FINGERPRINT",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Merchant browser fingerprint header shown in the docs."
+      },
+      "MerchantUserAgent": {
+        "name": "X-MERCHANT-USER-AGENT",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "User agent forwarded by the merchant."
+      },
+      "MerchantDomain": {
+        "name": "X-MERCHANT-DOMAIN",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uri"
+        },
+        "description": "Merchant domain origin."
+      },
+      "MerchantIP": {
+        "name": "X-MERCHANT-IP",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Merchant IP address."
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "resCode": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["failure"]
+          },
+          "errMessage": {
+            "type": "string"
+          }
+        },
+        "required": ["resCode", "status"],
+        "additionalProperties": true
+      },
+      "CustomerFields": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "email", "phone"],
+        "additionalProperties": false
+      },
+      "OrderCreateRequest": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "Transaction amount."
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code such as OMR or INR."
+          },
+          "uiMode": {
+            "type": "string",
+            "description": "UI mode for the transaction."
+          },
+          "receiptId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "customerFields": {
+            "$ref": "#/components/schemas/CustomerFields"
+          },
+          "curn": {
+            "type": "string"
+          },
+          "redirectType": {
+            "type": "string",
+            "description": "Redirection mode after the transaction completes."
+          }
+        },
+        "required": ["amount", "currency", "uiMode", "customerFields"],
+        "additionalProperties": false
+      },
+      "BankHostedOrderCreateResponse": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "amount": {
+            "oneOf": [
+              { "type": "number" },
+              { "type": "string" }
+            ]
+          },
+          "receiptId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "resCode": {
+            "type": "integer"
+          },
+          "errMessage": {
+            "type": "string"
+          }
+        },
+        "required": ["orderId", "amount", "receiptId", "status", "resCode"],
+        "additionalProperties": true
+      },
+      "PaymentDetails": {
+        "type": "object",
+        "properties": {
+          "paymentMethod": {
+            "type": "string"
+          },
+          "cardNetwork": {
+            "type": "string"
+          },
+          "cardType": {
+            "type": "string"
+          },
+          "cardUsageType": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      },
+      "BankHostedPaymentStatusResponse": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "paymentId": {
+            "type": "string"
+          },
+          "receiptId": {
+            "type": "string"
+          },
+          "amount": {
+            "oneOf": [
+              { "type": "number" },
+              { "type": "string" }
+            ]
+          },
+          "signature": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paymentDetails": {
+            "$ref": "#/components/schemas/PaymentDetails"
+          }
+        },
+        "required": ["orderId", "status", "paymentId", "receiptId", "amount", "signature", "timestamp"],
+        "additionalProperties": true
+      },
+      "TransactionInitiateRequest": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          },
+          "encryptedCardDetails": {
+            "type": "string",
+            "description": "AES-256-CBC encrypted card payload in `iv.ciphertext` hex format."
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["card"]
+          },
+          "cardHolderName": {
+            "type": "string"
+          },
+          "redirectionUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "paymentMode": {
+            "type": "string",
+            "enum": ["card", "token"]
+          },
+          "secureCard": {
+            "type": "boolean"
+          },
+          "skipCVVandOTP": {
+            "type": "boolean"
+          },
+          "skipCVVOnlyFlag": {
+            "type": "boolean"
+          },
+          "apiType": {
+            "type": "string",
+            "enum": ["hosted"]
+          }
+        },
+        "required": ["orderId", "encryptedCardDetails", "paymentMethod", "cardHolderName", "redirectionUrl", "paymentMode", "skipCVVandOTP", "skipCVVOnlyFlag", "apiType"],
+        "additionalProperties": false
+      },
+      "RedirectionData": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": ["POST", "GET"]
+          },
+          "formData": {
+            "type": "string"
+          }
+        },
+        "required": ["method", "formData"],
+        "additionalProperties": true
+      },
+      "SecuredCardDetails": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string"
+          },
+          "digitalCardId": {
+            "type": "string"
+          }
+        },
+        "required": ["customerId", "digitalCardId"],
+        "additionalProperties": false
+      },
+      "InitiateTransactionResponse": {
+        "type": "object",
+        "properties": {
+          "resCode": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "paymentId": {
+                "type": "string"
+              },
+              "orderId": {
+                "type": "string"
+              },
+              "receiptId": {
+                "type": "string"
+              },
+              "paymentStatus": {
+                "type": "string"
+              },
+              "amount": {
+                "oneOf": [
+                  { "type": "number" },
+                  { "type": "string" }
+                ]
+              },
+              "currency": {
+                "type": "string"
+              },
+              "redirectionData": {
+                "$ref": "#/components/schemas/RedirectionData"
+              },
+              "securedCardDetails": {
+                "$ref": "#/components/schemas/SecuredCardDetails"
+              }
+            },
+            "required": ["paymentId", "orderId", "receiptId", "paymentStatus", "amount", "currency", "redirectionData"],
+            "additionalProperties": true
+          }
+        },
+        "required": ["resCode", "status", "data"],
+        "additionalProperties": true
+      },
+      "RefundRequest": {
+        "type": "object",
+        "properties": {
+          "paymentId": {
+            "type": "string"
+          },
+          "amount": {
+            "oneOf": [
+              { "type": "number" },
+              { "type": "string" }
+            ]
+          }
+        },
+        "required": ["paymentId", "amount"],
+        "additionalProperties": false
+      },
+      "RefundResponse": {
+        "type": "object",
+        "properties": {
+          "resCode": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "refundId": {
+                "type": "string"
+              },
+              "paymentId": {
+                "type": "string"
+              },
+              "orderId": {
+                "type": "string"
+              },
+              "receiptId": {
+                "type": "string"
+              },
+              "paymentStatus": {
+                "type": "string"
+              },
+              "paymentMethod": {
+                "type": "string"
+              },
+              "amount": {
+                "oneOf": [
+                  { "type": "number" },
+                  { "type": "string" }
+                ]
+              },
+              "currency": {
+                "type": "string"
+              },
+              "initiatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "signature": {
+                "type": "string"
+              }
+            },
+            "required": ["refundId", "paymentId", "orderId", "receiptId", "paymentStatus", "paymentMethod", "amount", "currency", "initiatedAt", "completedAt", "signature"],
+            "additionalProperties": true
+          }
+        },
+        "required": ["resCode", "status", "data"],
+        "additionalProperties": true
+      },
+      "TransactionStatusResponse": {
+        "type": "object",
+        "properties": {
+          "resCode": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "paymentId": {
+                "type": "string"
+              },
+              "orderId": {
+                "type": "string"
+              },
+              "receiptId": {
+                "type": "string"
+              },
+              "paymentStatus": {
+                "type": "string"
+              },
+              "paymentMethod": {
+                "type": "string"
+              },
+              "transactionType": {
+                "type": "string",
+                "enum": ["sales", "refund"]
+              },
+              "amount": {
+                "oneOf": [
+                  { "type": "number" },
+                  { "type": "string" }
+                ]
+              },
+              "currency": {
+                "type": "string"
+              },
+              "initiatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "completedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "signature": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "paymentDetails": {
+                "$ref": "#/components/schemas/PaymentDetails"
+              }
+            },
+            "required": ["paymentId", "orderId", "receiptId", "paymentStatus", "paymentMethod", "transactionType", "amount", "currency", "initiatedAt", "completedAt", "signature"],
+            "additionalProperties": true
+          }
+        },
+        "required": ["resCode", "status", "data"],
+        "additionalProperties": true
+      },
+      "DigitalCard": {
+        "type": "object",
+        "properties": {
+          "digitalCardId": {
+            "type": "string"
+          },
+          "network": {
+            "type": "string"
+          },
+          "cardType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "panLastFour": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["digitalCardId", "network", "cardType", "status", "panLastFour", "createdAt", "updatedAt"],
+        "additionalProperties": true
+      },
+      "DigitalCardListResponse": {
+        "type": "object",
+        "properties": {
+          "resCode": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "digitalCards": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DigitalCard"
+                }
+              },
+              "remainingLimit": {
+                "type": "integer"
+              }
+            },
+            "required": ["digitalCards", "remainingLimit"],
+            "additionalProperties": true
+          }
+        },
+        "required": ["resCode", "status", "data"],
+        "additionalProperties": true
+      },
+      "DigitalCardDetailResponse": {
+        "type": "object",
+        "properties": {
+          "resCode": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "digitalCard": {
+                "$ref": "#/components/schemas/DigitalCard"
+              },
+              "remainingLimit": {
+                "type": "integer"
+              }
+            },
+            "required": ["digitalCard", "remainingLimit"],
+            "additionalProperties": true
+          }
+        },
+        "required": ["resCode", "status", "data"],
+        "additionalProperties": true
+      },
+      "DeleteDigitalCardResponse": {
+        "type": "object",
+        "properties": {
+          "resCode": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "customerId": {
+                "type": "string"
+              },
+              "digitalCardId": {
+                "type": "string"
+              }
+            },
+            "required": ["customerId", "digitalCardId"],
+            "additionalProperties": true
+          }
+        },
+        "required": ["resCode", "status", "data"],
+        "additionalProperties": true
+      },
+      "MerchantOrderResponse": {
+        "type": "object",
+        "properties": {
+          "resCode": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "orderId": {
+                "type": "string"
+              },
+              "receiptId": {
+                "type": "string"
+              },
+              "amount": {
+                "oneOf": [
+                  { "type": "number" },
+                  { "type": "string" }
+                ]
+              },
+              "currency": {
+                "type": "string"
+              }
+            },
+            "required": ["orderId", "receiptId", "amount", "currency"],
+            "additionalProperties": true
+          }
+        },
+        "required": ["resCode", "status", "data"],
+        "additionalProperties": true
+      }
+    }
+  }
+}

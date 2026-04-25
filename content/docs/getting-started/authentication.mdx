@@ -1,0 +1,71 @@
+---
+title: Authentication
+description: How to authenticate with the OMPAY Payment Gateway API
+---
+
+# Authentication
+
+OMPAY uses multiple authentication mechanisms to ensure secure API communication.
+
+## Bank Hosted Authentication
+
+Bank-hosted integrations use **Basic Authentication** only.
+
+### Basic Auth
+
+The `Authorization` header contains a base64-encoded string of `CLIENT_ID:CLIENT_SECRET`:
+
+```
+Authorization: Basic <base64-encoded-string>
+```
+
+### Example
+
+```bash
+curl -X POST {{domain}}/nac/api/v1/pg/orders/create-checkout \
+  -U [CLIENT_ID]:[CLIENT_SECRET] \
+  -H 'Content-Type: application/json'
+```
+
+## Merchant Hosted Authentication
+
+Merchant-hosted integrations require **Basic Authentication** plus additional security headers.
+
+### Required Headers
+
+| Header | Mandatory | Description | Example |
+|--------|-----------|-------------|---------|
+| `Authorization` | Yes | Basic Auth | `Basic eW91ci1jbGllZW50LWlkOnlvdXItY2xpZW50LXNlY3JldC1rZXk=` |
+| `Content-Type` | Yes | Content type | `application/json` |
+| `X-Signature` | Yes | HMAC signature | `<generated_signature>` |
+| `X-MERCHANT-BROWSER-FINGERPRINT` | Yes | Browser fingerprint | `8357426ac73fcd60b17355ab7de60421` |
+| `X-MERCHANT-USER-AGENT` | Yes | User agent string | `Mozilla/5.0...` |
+| `X-MERCHANT-DOMAIN` | Yes | Merchant domain | `https://www.xyz.com` |
+| `Accept-Language` | Yes | Locale (BCP 47) | `en-US` |
+| `X-MERCHANT-IP` | No | Merchant IP | `123.123.123.123` |
+
+### Example Request
+
+```bash
+curl -X POST '{{baseUrl}}/order' \
+  --header 'Authorization: Basic eW91ci1jbGllZW50LWlkOnlvdXItY2xpZW50LXNlY3JldC1rZXk=' \
+  --header 'Content-Type: application/json' \
+  --header 'X-Signature: <generated_signature>' \
+  --header 'X-MERCHANT-BROWSER-FINGERPRINT: 8357426ac73fcd60b17355ab7de60421' \
+  --header 'X-MERCHANT-USER-AGENT: Mozilla/5.0...' \
+  --header 'X-MERCHANT-DOMAIN: https://www.xyz.com' \
+  --header 'X-MERCHANT-IP: 123.123.123.123'
+```
+
+## Obtaining Credentials
+
+1. Log in to the [OMPAY Merchant Portal](https://merchant.uat.gateway.ompay.com/).
+2. Navigate to **Payment Gateway** > **Payment Checkout Page**.
+3. For bank-hosted flows, create a client ID and secret key.
+4. For merchant-hosted flows, create a client ID, client secret, and card encryption key.
+
+## Next Steps
+
+- [Signature Generation](/docs/reference/signature-verification)
+- [Bank Hosted Integration](/docs/integrations/bank-hosted)
+- [Merchant Hosted Integration](/docs/integrations/merchant-hosted)

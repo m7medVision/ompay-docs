@@ -1,0 +1,82 @@
+---
+title: Merchant Hosted
+description: Use ompay.js for merchant-hosted orders, card encryption, transactions, refunds, and saved cards.
+---
+
+# Merchant Hosted
+
+Use these methods when you want to create orders on your backend, encrypt card data, initiate transactions, and manage saved cards.
+
+For the gateway flow itself, see the main [Merchant Hosted Integration](/docs/integrations/merchant-hosted) guide.
+
+## Full Flow
+
+```typescript
+import { OMPayClient } from 'ompay.js';
+
+const client = new OMPayClient({
+  clientId: 'your-client-id',
+  clientSecret: 'your-client-secret',
+  environment: 'sandbox',
+  merchant: {
+    browserFingerprint: 'fingerprint-123',
+    userAgent: 'Mozilla/5.0',
+    domain: 'https://merchant.example.com',
+    acceptLanguage: 'en-US',
+    cardEncryptionKey: '64-char-hex-key-from-merchant-dashboard',
+  },
+});
+
+const order = await client.createOrder({
+  amount: 100.0,
+  currency: 'OMR',
+  description: 'Hosted order',
+  receiptId: 'INV-1',
+  customerFields: {
+    name: 'Jane Doe',
+    email: 'jane@example.com',
+    phone: '91234567',
+  },
+});
+
+const encryptedCardDetails = client.encryptCardDetails({
+  cardNumber: '4111111111111111',
+  cardExpMonth: '02',
+  cardExpYear: '27',
+  cardCVV: '123',
+});
+
+const payment = await client.initiateTransaction({
+  orderId: order.orderId,
+  encryptedCardDetails,
+  cardHolderName: 'Jane Doe',
+  redirectionUrl: 'https://merchant.example.com/return',
+  paymentMode: 'card',
+  secureCard: true,
+});
+
+const paymentStatus = await client.getTransactionStatus(payment.paymentId);
+```
+
+## Other Methods
+
+- `client.refundTransaction({ paymentId, amount }, context?)`
+- `client.listDigitalCards(customerId, context?)`
+- `client.deleteDigitalCard(customerId, digitalCardId, context?)`
+
+## Advanced Helpers
+
+- `client.buildMerchantHeaders(apiPath, context?, payload?)`
+- `client.generateMerchantSignature(apiPath, payload?)`
+
+## Notes
+
+- Set `merchant.cardEncryptionKey` before calling `encryptCardDetails`.
+- Use a per-request `context` when merchant headers differ between requests.
+- Reuse the same configured client for related merchant-hosted operations.
+
+## Next Steps
+
+- [Webhooks and Signatures](/docs/sdks/ompay-js/webhooks-and-signatures)
+- [Errors and Testing](/docs/sdks/ompay-js/errors-and-testing)
+- [API Reference](/docs/api-reference)

@@ -1,0 +1,88 @@
+---
+title: Webhooks and Signatures
+description: Validate OMPAY webhooks and payment signatures with ompay.js.
+---
+
+# Webhooks and Signatures
+
+Use the SDK helpers on this page to validate webhook payloads and payment callbacks.
+
+For the platform behavior, see the main [Webhooks](/docs/reference/webhooks) and [Signature Verification](/docs/reference/signature-verification) guides.
+
+## Transaction Webhooks
+
+Merchants can configure server-to-server callback URLs in the merchant dashboard to receive transaction and refund updates.
+
+### Supported Event Types
+
+| Event Type | Description |
+|------------|-------------|
+| `TRANSACTION_COMPLETED` | Transaction completed successfully |
+| `TRANSACTION_FAILED` | Transaction failed |
+| `REFUND_SUCCESS` | Refund completed successfully |
+| `REFUND_FAILED` | Refund failed |
+
+Webhook payloads are exported as TypeScript types:
+
+```typescript
+import { OMPayClient, type OMPayWebhookEvent } from 'ompay.js';
+
+const client = new OMPayClient({
+  clientId: 'your-client-id',
+  clientSecret: 'your-client-secret',
+});
+
+app.post('/ompay/webhook', async (req, res) => {
+  const rawBody = req.body.toString('utf8');
+  const event = JSON.parse(rawBody) as OMPayWebhookEvent;
+
+  if (!client.verifyWebhookSignature(rawBody, event.data.signature)) {
+    res.status(400).send('Signature mismatched');
+    return;
+  }
+
+  switch (event.eventType) {
+    case 'TRANSACTION_COMPLETED':
+    case 'TRANSACTION_FAILED':
+      console.log(event.data.paymentId, event.data.transactionType);
+      break;
+    case 'REFUND_SUCCESS':
+    case 'REFUND_FAILED':
+      console.log(event.data.refundId, event.data.paymentId);
+      break;
+  }
+
+  res.status(204).send();
+});
+```
+
+Use raw-body middleware for this route, such as `express.raw({ type: 'application/json' })`, so `verifyWebhookSignature` receives the exact payload OMPAY signed.
+
+## Signature Verification
+
+Use `verifyWebhookSignature` for the exact raw webhook body received from OMPAY and `verifySignature` for the documented `orderId|paymentId` payment signature format.
+
+```typescript
+const rawWebhookBody = JSON.stringify({ paymentId: 'pay-123', status: 'success' });
+
+const isWebhookValid = client.verifyWebhookSignature(
+  rawWebhookBody,
+  'signature-from-header',
+);
+
+const isPaymentValid = client.verifySignature(
+  { orderId: 'order-id', paymentId: 'payment-id' },
+  'signature-from-callback',
+);
+
+client.verifySignatureOrThrow(
+  { orderId: 'order-id', paymentId: 'payment-id' },
+  'signature-from-callback',
+);
+```
+
+## Next Steps
+
+- [Merchant Hosted](/docs/sdks/ompay-js/merchant-hosted)
+- [Errors and Testing](/docs/sdks/ompay-js/errors-and-testing)
+- [Reference Webhooks](/docs/reference/webhooks)

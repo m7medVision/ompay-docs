@@ -1,0 +1,151 @@
+---
+title: Webhooks
+description: Real-time notifications for transaction and refund status changes
+---
+
+# Webhooks
+
+Webhooks provide real-time notifications to merchants about transaction and refund status changes.
+
+## Configuration
+
+Configure your server-to-server callback URL in the OMPAY merchant dashboard.
+
+## Supported Event Types
+
+| Event Type | Description |
+|------------|-------------|
+| `TRANSACTION_COMPLETED` | Payment successfully completed |
+| `TRANSACTION_FAILED` | Payment failed |
+| `REFUND_SUCCESS` | Refund processed successfully |
+| `REFUND_FAILED` | Refund processing failed |
+
+## Validation and Response Flow
+
+1. Receive webhook payload containing a signature.
+2. Verify the signature using HMAC (see [Signature Verification](/docs/reference/signature-verification)).
+3. Respond appropriately.
+
+### Success Response
+
+```javascript
+res.status(204).send();
+```
+
+### Error Response
+
+```javascript
+res.status(400).send('Signature mismatched');
+```
+
+## Webhook Payloads
+
+### TRANSACTION_COMPLETED
+
+```json
+{
+  "eventType": "TRANSACTION_COMPLETED",
+  "data": {
+    "paymentId": "paycbaff3b9dc5443f0ba0997970ebeddfa",
+    "orderId": "wb-bf35c7de-1e8f-425a-8833-bc23d609b256",
+    "receiptId": "",
+    "transactionType": "sales",
+    "paymentStatus": "success",
+    "paymentMethod": "card",
+    "amount": "1.00",
+    "currency": "OMR",
+    "initiatedAt": "2025-05-29T07:21:19.845Z",
+    "completedAt": "2025-05-29T07:21:19.846Z",
+    "signature": "10ff8c4ddbeb8fcf24fcc110acb31599690a8057ecd3a7141b22354f9b73337f",
+    "description": "Transaction completed",
+    "paymentDetails": {
+      "cardNetwork": "visa",
+      "cardType": "credit",
+      "cardUsageType": "domestic"
+    }
+  }
+}
+```
+
+### TRANSACTION_FAILED
+
+```json
+{
+  "eventType": "TRANSACTION_FAILED",
+  "data": {
+    "paymentId": "paycbaff3b9dc5443f0ba0997970ebeddfa",
+    "orderId": "wb-bf35c7de-1e8f-425a-8833-bc23d609b256",
+    "receiptId": "",
+    "transactionType": "sales",
+    "paymentStatus": "failure",
+    "paymentMethod": "card",
+    "amount": "1.00",
+    "currency": "OMR",
+    "initiatedAt": "2025-05-29T07:21:19.845Z",
+    "completedAt": "2025-05-29T07:21:19.846Z",
+    "description": "Transaction failed",
+    "signature": "10ff8c4ddbeb8fcf24fcc110acb31599690a8057ecd3a7141b22354f9b73337f",
+    "paymentDetails": {
+      "cardNetwork": "visa",
+      "cardType": "credit",
+      "cardUsageType": "domestic"
+    }
+  }
+}
+```
+
+### REFUND_SUCCESS
+
+```json
+{
+  "eventType": "REFUND_SUCCESS",
+  "data": {
+    "refundId": "refundcff3b9dc5443f0ba0997970ebeddfa",
+    "paymentId": "paycbaff3b9dc5443f0ba0997970ebeddfa",
+    "orderId": "wb-bf35c7de-1e8f-425a-8833-bc23d609b256",
+    "receiptId": "",
+    "paymentStatus": "success",
+    "paymentMethod": "card",
+    "amount": "1.00",
+    "currency": "OMR",
+    "initiatedAt": "2025-05-29T07:21:19.845Z",
+    "completedAt": "2025-05-29T07:21:19.846Z",
+    "description": "Refund completed",
+    "signature": "10ff8c4ddbeb8fcf24fcc110acb31599690a8057ecd3a7141b22354f9b73337f"
+  }
+}
+```
+
+### REFUND_FAILED
+
+```json
+{
+  "eventType": "REFUND_FAILED",
+  "data": {
+    "refundId": "refundcff3b9dc5443f0ba0997970ebeddfa",
+    "paymentId": "paycbaff3b9dc5443f0ba0997970ebeddfa",
+    "orderId": "wb-bf35c7de-1e8f-425a-8833-bc23d609b256",
+    "receiptId": "",
+    "paymentStatus": "failure",
+    "paymentMethod": "card",
+    "amount": "1.00",
+    "currency": "OMR",
+    "initiatedAt": "2025-05-29T07:21:19.845Z",
+    "completedAt": "2025-05-29T07:21:19.846Z",
+    "description": "Refund failed",
+    "signature": "10ff8c4ddbeb8fcf24fcc110acb31599690a8057ecd3a7141b22354f9b73337f"
+  }
+}
+```
+
+## Important Notes
+
+- Always verify the signature before processing webhook data.
+- Return `204` for successful processing.
+- Return `400` if signature verification fails.
+- Implement idempotency to handle duplicate webhook deliveries.
+
+## Next Steps
+
+- [Signature Verification](/docs/reference/signature-verification)
+- [Merchant Hosted Integration](/docs/integrations/merchant-hosted)

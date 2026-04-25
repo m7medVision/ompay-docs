@@ -1,0 +1,55 @@
+---
+title: API Reference
+description: Overview, interactive endpoint docs, and the downloadable OpenAPI specification for the OMPAY Payment Gateway API
+---
+
+# API Reference
+
+The OMPAY Payment Gateway API is organized around REST. All endpoints return JSON and use standard HTTP response codes.
+
+## Base URLs
+
+| Environment | Base URL |
+|-------------|----------|
+| UAT or Sandbox | `https://api.uat.gateway.ompay.com` |
+| Production | `https://api.gateway.ompay.com` |
+
+## Authentication
+
+All endpoints require authentication. See the [Authentication](/docs/getting-started/authentication) guide for details on obtaining credentials and generating signatures.
+
+## Endpoint Groups
+
+### Bank Hosted
+
+Endpoints for redirect-based checkout flows where OMPAY handles the payment page.
+
+- Create Checkout Order
+- Check Payment Status
+
+### Merchant Hosted
+
+Endpoints for server-to-server integrations with encrypted card data and full checkout control.
+
+- Create Order
+- Initiate Transaction
+- Get Transaction Status
+- Initiate Refund
+- List Digital Cards
+- Get Digital Card
+- Delete Digital Card
+
+## Interactive Reference
+
+The live OpenAPI reference is now integrated into this docs site.
+
+- Browse the generated endpoint docs from the **Endpoints** section in the sidebar.
+- Use the downloaded schema below if you want to import the API into another tool.
+
+## OpenAPI Specification
+
+- [Download the full OpenAPI spec](/docs-openapi.json)
+
+## Coverage Notes
+
+The legacy Mintlify site exposed the spec as the primary API reference. This migration keeps the same OpenAPI document available from the new site while the content structure is now managed inside `content/docs`.

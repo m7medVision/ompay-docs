@@ -1,0 +1,11 @@
+{
+  "title": "ompay.js",
+  "pages": [
+    "index",
+    "configuration",
+    "bank-hosted",
+    "merchant-hosted",
+    "webhooks-and-signatures",
+    "errors-and-testing"
+  ]
+}

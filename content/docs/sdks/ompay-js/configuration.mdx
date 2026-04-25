@@ -1,0 +1,74 @@
+---
+title: Configuration
+description: Configure OMPayClient and reusable merchant defaults for ompay.js.
+---
+
+# Configuration
+
+Use `OMPayClient` to store your client credentials, environment, timeout, and optional merchant defaults in one place.
+
+## Config Shape
+
+```typescript
+interface OMPayConfig {
+  clientId: string;
+  clientSecret: string;
+  environment?: 'sandbox' | 'production';
+  timeout?: number;
+  merchant?: {
+    domain?: string;
+    browserFingerprint?: string;
+    userAgent?: string;
+    ipAddress?: string;
+    acceptLanguage?: string;
+    cardEncryptionKey?: string;
+  };
+}
+```
+
+## Base Client Example
+
+```typescript
+import { OMPayClient } from 'ompay.js';
+
+const client = new OMPayClient({
+  clientId: 'your-client-id',
+  clientSecret: 'your-client-secret',
+  environment: 'sandbox',
+  timeout: 15000,
+});
+```
+
+## Merchant Defaults
+
+Use `merchant` defaults when calling merchant-hosted APIs.
+
+```typescript
+const client = new OMPayClient({
+  clientId: 'your-client-id',
+  clientSecret: 'your-client-secret',
+  environment: 'sandbox',
+  merchant: {
+    domain: 'https://merchant.example.com',
+    browserFingerprint: 'fingerprint-123',
+    userAgent: 'Mozilla/5.0',
+    ipAddress: '203.0.113.10',
+    acceptLanguage: 'en-US',
+    cardEncryptionKey: '64-char-hex-key-from-merchant-dashboard',
+  },
+});
+```
+
+You can also pass a per-request `MerchantRequestContext` as the second argument to merchant-hosted methods when you need to override these values for a single request.
+
+## Additional Helpers
+
+- `client.getClientId()`
+- `client.getEnvironment()`
+- `client.getBaseUrl()`
+
+## Next Steps
+
+- [Bank Hosted](/docs/sdks/ompay-js/bank-hosted)
+- [Merchant Hosted](/docs/sdks/ompay-js/merchant-hosted)
+- [Webhooks and Signatures](/docs/sdks/ompay-js/webhooks-and-signatures)

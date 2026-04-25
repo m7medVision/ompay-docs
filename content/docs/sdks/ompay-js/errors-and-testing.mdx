@@ -1,0 +1,72 @@
+---
+title: Errors and Testing
+description: Handle SDK errors and use sandbox test cards with ompay.js.
+---
+
+# Errors and Testing
+
+Use this page for runtime error handling and sandbox card values.
+
+## Error Handling
+
+```typescript
+import { OMPayClient, OMPayError } from 'ompay.js';
+
+try {
+  const order = await client.createCheckout({
+    amount: 100.0,
+    currency: 'OMR',
+    customerFields: {
+      name: 'Jane Doe',
+      email: 'jane@example.com',
+      phone: '91234567',
+    },
+  });
+} catch (error) {
+  if (error instanceof OMPayError) {
+    console.error('Error code:', error.code);
+    console.error('Message:', error.message);
+    console.error('Status:', error.statusCode);
+  }
+}
+```
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `AUTHENTICATION_ERROR` | Invalid client ID or secret |
+| `VALIDATION_ERROR` | Invalid request parameters |
+| `API_ERROR` | Server-side error |
+| `NETWORK_ERROR` | Network connectivity issue |
+| `TIMEOUT_ERROR` | Request timed out |
+| `SIGNATURE_MISMATCH` | Invalid payment signature |
+| `UNKNOWN_ERROR` | Unexpected SDK or runtime error |
+
+## Test Cards
+
+Use these official cards in the UAT and sandbox environment only.
+
+### VISA Card (Always Approved)
+
+- **Card Number:** 4111111111111111
+- **Expiry:** 12/30
+- **CVV:** 123
+
+### MasterCard (Always Approved)
+
+- **Card Number:** 5186001700008785
+- **Expiry:** 12/30
+- **CVV:** 123
+
+### VISA Card (Always Rejected)
+
+- **Card Number:** 4393570006367857
+- **Expiry:** 12/30
+- **CVV:** 123
+
+## Next Steps
+
+- [Bank Hosted](/docs/sdks/ompay-js/bank-hosted)
+- [Merchant Hosted](/docs/sdks/ompay-js/merchant-hosted)
+- [Platform Test Cards](/docs/reference/test-cards)

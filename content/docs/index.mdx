@@ -1,13 +1,60 @@
 ---
-title: Hello World
-description: Your first document
+title: Introduction
+description: Get started with OMPAY Payment Gateway integration
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+# OMPAY Payment Gateway Integration
 
-## What is Next?
+Welcome to the OMPAY Payment Gateway documentation. This guide helps you integrate secure payment processing into your website or application.
 
-<Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
-</Cards>
+## Integration Options
+
+OMPAY offers two main integration approaches:
+
+### Bank Hosted
+
+The bank-hosted integration redirects your customers to OMPAY's secure checkout page to complete payment. This is the simplest option and is recommended for most merchants.
+
+**Key features:**
+
+- Simple redirect-based flow
+- OMPAY handles PCI compliance
+- Minimal integration effort
+
+**Endpoints:**
+
+- UAT: `https://api.uat.gateway.ompay.com`
+- Production: `https://api.gateway.ompay.com`
+
+### Merchant Hosted
+
+The merchant-hosted integration lets you collect payment details directly in your own experience while maintaining secure encryption and support for advanced payment flows.
+
+**Key features:**
+
+- Full control over the checkout experience
+- Card tokenization for repeat customers
+- Real-time webhook notifications
+- Refund support
+
+**Endpoints:**
+
+- Sandbox: `https://api.uat.gateway.ompay.com/nac/api/v1/merchant-host`
+- Production: [To be provided]
+
+## Getting Started
+
+1. Log in to the [OMPAY Merchant Portal](https://docs.ompay.om).
+2. Navigate to **Payment Gateway** > **Payment Checkout Page**.
+3. Create your client credentials.
+4. Choose your integration method below.
+
+## Quick Links
+
+- [Authentication](/docs/getting-started/authentication)
+- [Bank Hosted Integration](/docs/integrations/bank-hosted)
+- [Merchant Hosted Integration](/docs/integrations/merchant-hosted)
+- [API Reference](/docs/api-reference)
+- [Webhooks](/docs/reference/webhooks)
+- [Test Cards](/docs/reference/test-cards)
+- [ompay.js SDK](/docs/sdks/ompay-js)
