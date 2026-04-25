@@ -37,7 +37,7 @@ export default function HomePage() {
         <div className="flex flex-col w-full justify-center gap-4 sm:w-auto sm:flex-row">
           <Link
             href="/docs"
-            className="inline-flex h-12 items-center justify-center rounded-full bg-blue-600 px-8 text-base font-semibold text-white transition-colors hover:bg-blue-500 shadow-md"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-fd-primary px-8 text-base font-semibold text-fd-primary-foreground transition-colors hover:opacity-90 shadow-md"
           >
             Getting Started
           </Link>
