@@ -1,0 +1,13 @@
+{
+  "title": "Merchant hosted",
+  "description": "Merchant-hosted API flow for order creation, payment initiation, refunds, status checks, and token management.",
+  "pages": [
+    "order/post",
+    "transaction/initiate/post",
+    "transaction/refund/post",
+    "transaction/status/paymentid/get",
+    "customer/customerid/digitalcards/get",
+    "customer/customerid/digitalcards/digitalcardid/get",
+    "customer/customerid/digitalcards/digitalcardid/delete"
+  ]
+}

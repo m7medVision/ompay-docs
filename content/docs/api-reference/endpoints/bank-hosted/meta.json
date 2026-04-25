@@ -1,0 +1,8 @@
+{
+  "title": "Bank hosted",
+  "description": "Checkout flow that uses the bank-hosted gateway endpoints.",
+  "pages": [
+    "nac/api/v1/pg/orders/create-checkout/post",
+    "nac/api/v1/pg/orders/check-status/get"
+  ]
+}
