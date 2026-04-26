@@ -45,11 +45,6 @@ export const docsMenuItems = [
     icon: <Book />,
   },
   {
-    text: 'Integrations',
-    url: '/docs/integrations',
-    icon: <Cpu />,
-  },
-  {
     text: 'API Reference',
     url: '/docs/api-reference',
     icon: <Code />,
