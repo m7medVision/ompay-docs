@@ -2,5 +2,5 @@
   "title": "SDKs",
   "description": "Client libraries and SDKs",
   "icon": "Key",
-  "pages": ["ompay-js"]
+  "pages": ["index", "ompay-js"]
 }
