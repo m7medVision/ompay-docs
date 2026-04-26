@@ -9,28 +9,8 @@ Unofficial TypeScript and Node.js SDK for OMPAY Payment Gateway integration.
 
 ## Installation
 
-### pnpm
-
-```bash
-pnpm add ompay.js
-```
-
-### npm
-
-```bash
-npm install ompay.js
-```
-
-### yarn
-
-```bash
-yarn add ompay.js
-```
-
-### bun
-
-```bash
-bun add ompay.js
+```package-install
+npm i ompay.js
 ```
 
 ## Quick Start
@@ -48,7 +28,7 @@ const order = await client.createCheckout({
   amount: 100.0,
   currency: 'OMR',
   customer: {
-    name: 'Omar Al-Busaidi',
+    name: 'Mohammed Al Jahwari',
     email: 'omar@example.com',
     phone: '+96891234567',
   },
